@@ -328,7 +328,7 @@ void *image_capture_threadfunc(void *){
       int mutex_locked = pthread_mutex_lock(&img_mutex); 
       assert(mutex_locked == 0);
 
-        orig_image = cv::imread("prueba.jpg");  
+        orig_image = cv::imread("test.jpg");  
         if (orig_image.empty()){
           std::cout <<  "Could not open or find the image" << std::endl;
           std::cout.flush(); 

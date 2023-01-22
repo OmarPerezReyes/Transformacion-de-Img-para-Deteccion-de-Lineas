@@ -1,4 +1,8 @@
-# Transformacion-de-Img-para-Deteccion-de-Lineas
-Código desarrollado en C++
->Compilación
->>Solo basta con escribir el comando make o make all
+# Transformación de Imagen para Detección de Líneas
+Código desarrollado en C++.
+>Compilación y ejecución
+```
+make all
+make clean
+./image_transform test.jpg
+```

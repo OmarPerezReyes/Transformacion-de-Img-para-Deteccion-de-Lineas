@@ -4,13 +4,13 @@ LFLAGS =  `pkg-config --libs opencv4` -lglfw -lglut -lGLU -lGL -lGLEW -lpthread 
 # https://stackoverflow.com/questions/14492436/g-optimization-beyond-o3-ofast
 OPTIONS = -g #-Ofast -march=native -flto
 
-PROGRAM = adjust
+PROGRAM = image_transform 
 OBJECTS =  main.o 
 
 all :  $(PROGRAM)
 	 
-adjust : $(OBJECTS)
-	 $(CC) $(MATH_F) $(OBJECTS) -o adjust  $(LFLAGS) $(OPTIONS)
+image_transform : $(OBJECTS)
+	 $(CC) $(MATH_F) $(OBJECTS) -o image_transform  $(LFLAGS) $(OPTIONS)
 
 main.o:  main.cpp 
 	$(CC)  main.cpp -c  $(OPTIONS) $(CFLAGS) -o  main.o

@@ -80,8 +80,8 @@ void image_processing(cv::Mat orig_image){
 		
 		puts("Reading from keyboard");
 		puts("---------------------------");
-		puts("Moving around:");
-		puts("   i q w e r    ");
+		puts("Click to start, moving around:");
+		puts("   i q w e r , .  ");
 		puts("---------------------------");
 		
 		orig = orig_image.clone();
@@ -104,7 +104,7 @@ void image_processing(cv::Mat orig_image){
 		cv::invert(perspectiveMatrix, invertedPerspectiveMatrix);
 		cv::warpPerspective(orig, dst, perspectiveMatrix, dst.size(), cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 		cv::imshow("Display Image Gray", dst);
-		cv::waitKey(1);
+		cv::waitKey(50);
 
 		if(read(kfd, &c, 1) < 0){
 			perror("read():");

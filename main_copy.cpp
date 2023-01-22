@@ -35,108 +35,59 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 #define KEYCODE_V 0x76
 #define KEYCODE_T 0x74
 #define KEYCODE_B 0x62
+
 #define KEYCODE_COMMA 0x2c
 #define KEYCODE_PERIOD 0x2e
 
-bool die = false;
-bool first_time = true;
-int x1;
-    int x2;
-    int x3;
-    int x4;
-    int y_1;
-    int y2;
-    int kfd;
-   
-    char c;
-    struct termios cooked, raw;
-
-    int sign;
-    
-          cv::Point2f srcVertices[4];
-                // Destination vertices. Output is 640 by 480px  
-                cv::Point2f dstVertices[4];
-                
-      
 volatile unsigned int width = 639;
 volatile unsigned int height = 281;
 cv::Mat orig_image(cv::Size(width, height), CV_8UC3);
 cv::Rect myROI(0, 140, 639, 141); // (x,y, x + width, y + height)
-   cv::Mat temp;
-    cv::Mat orig;
-          cv::Mat img;
-                cv::Mat invertedPerspectiveMatrix;
+
     
-void image_processing(cv::Mat orig_image){
-    
-    if(first_time){
-    
-    // Inicio para imágenes 640x480, x1 -90 x2 550 x3 600 x4 -190 y1 250 y2 300
- x1 = 50;
-     x2 = 630;
-     x3 = 690;
-     x4 = -70;
-     y_1 = 190;
-     y2 = 260;
-  dstVertices[0] = cv::Point(0, 0);
+void image_processing(void *){
+// Define points that are used for generating bird's eye view. This was done by trial and error. Best to prepare sliders and configure for each use case. 
+      cv::Point2f srcVertices[4];       
+      // Funciona mejor todavía
+      srcVertices[0] = cv::Point(*x1, *y1);
+      srcVertices[1] = cv::Point(*x2, *y1);
+      srcVertices[2] = cv::Point(*x3, *y2);
+      srcVertices[3] = cv::Point(*x4, *y2);    
+
+      // Destination vertices. Output is 640 by 480px 
+      
+      cv::Point2f dstVertices[4];
+      dstVertices[0] = cv::Point(0, 0);
       dstVertices[1] = cv::Point(639, 0);
       dstVertices[2] = cv::Point(639, 281);
       dstVertices[3] = cv::Point(0, 281);
-    
-
-     kfd = 0;
-         sign = 1;
-        tcgetattr(kfd, &cooked);
-        memcpy(&raw, &cooked, sizeof(struct termios));
-        raw.c_lflag &=~ (ICANON | ECHO);
-        raw.c_cc[VEOL] = 1;
-        raw.c_cc[VEOF] = 2;
-        tcsetattr(kfd, TCSANOW, &raw);
-
-        puts("Reading from keyboard");
-        puts("---------------------------");
-        puts("Moving around:");
-        puts("   i q w e r    ");
-        puts("---------------------------");
-
-        orig = orig_image.clone();    
-        first_time=false;	
-    }
-    
-    
-    
-    while(!die){
-          
-      // Funciona mejor todavía
-      srcVertices[0] = cv::Point(x1, y_1);
-      srcVertices[1] = cv::Point(x2, y_1);
-      srcVertices[2] = cv::Point(x3, y2);
-      srcVertices[3] = cv::Point(x4, y2);    
-
 
       // Prepare matrix for transform and get the warped image 
       cv::Mat perspectiveMatrix = getPerspectiveTransform(srcVertices, dstVertices);
       cv::Mat dst(281, 639, CV_8UC3); //Destination for warped image 
 //For transforming back into original image space 
-
+      cv::Mat invertedPerspectiveMatrix;
       cv::invert(perspectiveMatrix, invertedPerspectiveMatrix);
 
       cv::warpPerspective(orig, dst, perspectiveMatrix, dst.size(), cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
-      cv::imshow("Display Image Gray", dst);
-      cv::waitKey(0);
-    
-        if(read(kfd, &c, 1) < 0)
+   
+      //Convert to gray 
+      cv::Mat img;
+      cv::cvtColor(dst, img, cv::COLOR_RGB2GRAY);
+
+    cv::imshow("Display Image Gray", img);
+    cv::waitKey(0);
+    if(read(kfd, &c, 1) < 0)
         {
-            perror("read():");
-            exit(-1);
+          perror("read():");
+          exit(-1);
         }
 
         switch(c)  
         {
             case KEYCODE_I:
               sign *= -1;
-            break;
             case KEYCODE_Q:
               x1 = x1 + sign * 10;
             break;
@@ -150,24 +101,26 @@ void image_processing(cv::Mat orig_image){
               x4 = x4 + sign * 10;
             break;
             case KEYCODE_COMMA:
-              y_1 = y_1 + sign * 10;
+              y1 = y1 + sign * 10;
             break;
             case KEYCODE_PERIOD:
               y2 = y2 + sign * 10;
             break;
+            case KEYCODE_T:
+              die = true;
+            break;
         }
-        
+
+
       std::cout << "x1 " << x1;
       std::cout << " x2 " << x2;
       std::cout << " x3 " << x3;
       std::cout << " x4 " << x4;
-      std::cout << " y1 " << y_1;
+      std::cout << " y1 " << y1;
       std::cout << " y2 " << y2;
       std::cout << " sign " << sign << std::endl;
-      std::cout.flush();  
-        
-    }
-    
+      std::cout.flush();     
+ 
 }
     
 
@@ -185,9 +138,28 @@ int main(int argc, char** argv )
         printf("No image data \n");
         return -1;
     }
+    // Define the images that will be used first
+    cv::Mat temp;
+    cv::Mat orig;
+
+    // Inicio para imágenes 640x480, x1 -90 x2 550 x3 600 x4 -190 y1 250 y2 300
+    int x1 = 50;
+    int x2 = 630;
+    int x3 = 690;
+    int x4 = -70;
+    int y1 = 190;
+    int y2 = 260;
+  
+    int kfd = 0;
+    char c;
+    struct termios cooked, raw;
+    int sign = 1;
     
-    image_processing(orig_image);
-    exit(-1);
+    orig = orig_image.clone();
+    image_processing();  
     
     return 0;
-}
+    }
+    
+    
+    

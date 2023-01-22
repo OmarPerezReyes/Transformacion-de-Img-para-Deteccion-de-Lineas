@@ -4,5 +4,5 @@ Código desarrollado en C++.
 ```
 make all
 make clean
-./image_transform test.jpg
+./image_transform img/test.jpg
 ```

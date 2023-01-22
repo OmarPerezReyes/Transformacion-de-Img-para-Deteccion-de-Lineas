@@ -98,7 +98,9 @@ int main(int argc, char** argv ){
   puts("Reading from keyboard");
   puts("---------------------------");
   puts("Click to start, moving around:");
-  puts("   i q w e r f , .  ");
+  puts("   i q w e r to move horizontally f , .  ");
+  puts("   , .  to move vertically");
+  puts("   f  to force image output");
   puts("---------------------------");
 	
   orig = orig_image.clone();
@@ -108,14 +110,13 @@ int main(int argc, char** argv ){
   srcVertices[2] = cv::Point(x3, y2);
   srcVertices[3] = cv::Point(x4, y2);  
   // Prepare matrix for transform and get the warped image 
-  cv::Mat perspectiveMatrix = 
-         getPerspectiveTransform(srcVertices, dstVertices);
+  cv::Mat perspectiveMatrix = getPerspectiveTransform(srcVertices, dstVertices);
   cv::Mat dst(281, 639, CV_8UC3);
   //Destination for warped 
   //For transforming back into original image space 
   cv::invert(perspectiveMatrix, invertedPerspectiveMatrix);
   cv::warpPerspective(orig, dst, perspectiveMatrix, dst.size(),
-    cv::INTER_LINEAR, cv::BORDER_CONSTANT);
+  cv::INTER_LINEAR, cv::BORDER_CONSTANT);
 
   cv::imshow("Orig", orig_image);
   cv::waitKey(50);
@@ -132,7 +133,7 @@ int main(int argc, char** argv ){
     switch(c){
       case KEYCODE_I:
          sign *= -1;
-   	     break;
+   	 break;
       case KEYCODE_Q:
          x1 = x1 + sign * 10;
          break;
@@ -170,8 +171,7 @@ int main(int argc, char** argv ){
     srcVertices[2] = cv::Point(x3, y2);
     srcVertices[3] = cv::Point(x4, y2);  
     // Prepare matrix for transform and get the warped image 
-    cv::Mat perspectiveMatrix = 
-         getPerspectiveTransform(srcVertices, dstVertices);
+    cv::Mat perspectiveMatrix = getPerspectiveTransform(srcVertices, dstVertices);
     cv::Mat dst(281, 639, CV_8UC3);
     //Destination for warped 
     //For transforming back into original image space 
